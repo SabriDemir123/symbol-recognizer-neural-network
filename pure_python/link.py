@@ -1,2 +1,7 @@
+import random
+
 class Link:
-    pass
+    def __init__(self, sourceNode, destinationNode):
+        self.sourceNode = sourceNode
+        self.destinationNode = destinationNode
+        self.weight = random.uniform(0, 1)
