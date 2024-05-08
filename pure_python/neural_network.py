@@ -11,6 +11,9 @@ class NeuralNetwork:
         self.input_nodes = []
         self.output_nodes = []
 
+        self.costs = []
+        self.accuracies = []
+
         # Create all nodes
         total_nodes_size = input_nodes_size + output_nodes_size
         for i in range(total_nodes_size):
@@ -32,6 +35,9 @@ class NeuralNetwork:
         total = sum([m.exp(value) for value in values])
         return [m.exp(value) / total for value in values]
 
+    def convert_label(self, label):
+        return [1, 0] if label == 'O' else [0, 1]
+
     def forward_propagation(self, input_values):
         # Set input values
         index = 0
@@ -52,3 +58,37 @@ class NeuralNetwork:
             self.output_nodes[i].value = output_values[i]
         
         return output_values
+    
+    def calculate_mse(self, input_values, target_values):
+        # Calculate output with forward propagation
+        output_values = self.forward_propagation(input_values)
+
+        # Get desired values
+        desired_values = self.convert_label(target_values)
+
+        # Calculate mean squared error
+        return sum([m.pow((desired_values[i] - output_values[i]), 2) for i in range(len(output_values))]) / len(output_values)
+    
+    def back_propagation(self, target_values):
+        desired_values = self.convert_label(target_values)
+    
+        # Initialize the gradient as an empty list
+        bias_gradiants = []
+        weight_gradients = []
+    
+        for i, node in enumerate(self.output_nodes):
+            # Calculate the derivative of the mean squared error loss function
+            derivative_mse = 2 * (node.value - desired_values[i])
+            # Calculate the derivative of the softmax function
+            derivative_soft_max = node.value * (1 - node.value)
+            # Append the gradient of the bias to the list
+            bias_gradiants.append((node, derivative_mse * derivative_soft_max))
+            # Iterate over each incoming link to the current output node
+            for link in node.incoming_links:
+                # Calculate the derivative of the output value with respect to the link weight
+                derivative_output_value = link.source_node.value
+                # Append the gradient of the link weight to the list
+                weight_gradients.append((link, derivative_mse * derivative_soft_max * derivative_output_value))
+                
+        return bias_gradiants, weight_gradients
+    
