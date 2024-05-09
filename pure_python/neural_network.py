@@ -99,3 +99,44 @@ class NeuralNetwork:
         for link, weight_gradient in weight_gradients:
             link.weight -= learning_rate * weight_gradient
     
+    def predict(self, test_set):
+        predictions = []
+        for input_values, target_values in test_set:
+            # Calculate output with forward propagation
+            output_values = self.forward_propagation(input_values)
+            # Choose label with highest probability
+            predictions.append('O' if output_values[0] > output_values[1] else 'X')
+        return predictions
+
+    def accuracy(self, training_set):
+        correct = 0
+        # Get predictions
+        predictions = self.predict(training_set)
+        # Compare predictions with target values
+        for i in range(len(predictions)):
+            if predictions[i] == training_set[i][1]:
+                correct += 1
+        # Calculate accuracy
+        accuracy = correct / len(training_set) * 100
+        return accuracy
+
+    def train(self, training_set, max_cost, max_epoch, learning_rate):
+        # Ensure loop runs at least once
+        cost = max_cost + 1
+        epoch = 0
+        while epoch < max_epoch and cost > max_cost:
+            cost = 0
+            # Iterate over each training example
+            for input_values, target_values in training_set:
+                cost += self.calculate_mse(input_values, target_values)
+                bias_gradients, weight_gradients = self.back_propagation(target_values)
+                self.update_all_parameters(bias_gradients, weight_gradients, learning_rate)
+            # Calculate the average cost
+            cost /= len(training_set)
+            self.costs.append(cost)
+            # Calculate the accuracy
+            accuracy = self.accuracy(training_set)
+            self.accuracies.append(accuracy)
+            epoch += 1
+
+        print(f'Epoch: {epoch}, Cost: {cost}')
