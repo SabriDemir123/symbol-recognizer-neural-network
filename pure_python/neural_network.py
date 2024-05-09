@@ -92,3 +92,10 @@ class NeuralNetwork:
                 
         return bias_gradiants, weight_gradients
     
+    def update_all_parameters(self, bias_gradients, weight_gradients, learning_rate):
+        for node, bias_gradient in bias_gradients:
+            node.bias -= learning_rate * bias_gradient
+
+        for link, weight_gradient in weight_gradients:
+            link.weight -= learning_rate * weight_gradient
+    
