@@ -4,6 +4,13 @@ import numpy as np
 
 class NeuralNetwork:
     def __init__(self, input_nodes_size, output_nodes_size):
+        """
+        Initialize the neural network with the number of input nodes and output nodes.
+
+        Args:
+            input_nodes_size (int): The number of input nodes.
+            output_nodes_size (int): The number of output nodes.
+        """
         self.input_nodes_size = input_nodes_size
         self.output_nodes_size = output_nodes_size
 
@@ -24,6 +31,9 @@ class NeuralNetwork:
         self.create_links()
 
     def create_links(self):
+        """
+        Create links between input nodes and output nodes.
+        """
         for input_node in self.input_nodes:
             for output_node in self.output_nodes:
                 # Create a link between each input node and each output node
@@ -34,10 +44,28 @@ class NeuralNetwork:
                 self.links.append(link)
 
     def sigmoid(self, x):
+        """
+        Compute the sigmoid function.
+
+        Args:
+            x (float): The input value.
+
+        Returns:
+            float: The output value after applying the sigmoid function.
+        """
         # Sigmoid function
         return 1 / (1 + np.exp(-x))
 
     def forward_propagation(self, input_values):
+        """
+        Perform the forward propagation process.
+
+        Args:
+            input_values (list): The input values.
+
+        Returns:
+            list: Values of the output nodes.
+        """
         input_values = np.array(input_values).flatten()
         
         # Set input values
@@ -56,15 +84,43 @@ class NeuralNetwork:
 
 
     def convert_label(self, label):
+        """	
+        Convert label to a numpy array with target values.
+
+        Args:
+            label (str): The label.
+        
+        Returns:
+            np.array: The target values.
+        """
         return np.array([1, 0]) if label == 'O' else np.array([0, 1])
 
     def calculate_mse(self, input_values, target_values):
+        """
+        Calculate the mean squared error.
+
+        Args:
+            input_values (list): The input values.
+            target_values (str): The target values.
+        
+        Returns:
+            float: The mean squared error.
+        """
         output_values = self.forward_propagation(input_values)
         desired_values = self.convert_label(target_values)
         # Mean squared error loss function
         return np.mean((desired_values - output_values) ** 2) / len(output_values)
 
     def back_propagation(self, target_values):
+        """
+        Perform the backpropagation process.
+
+        Args:
+            target_values (list): The target values.
+        
+        Returns:
+            list: list of tuples containing the bias gradients and weight gradients.
+        """
         desired_values = self.convert_label(target_values)
 
         # Initialize gradient matrices
@@ -86,6 +142,14 @@ class NeuralNetwork:
         return bias_gradients, weight_gradients
 
     def update_all_parameters(self, bias_gradients, weight_gradients, learning_rate):
+        """
+        Update all parameters of the neural network.
+
+        Args:
+            bias_gradients (list): The bias gradients.
+            weight_gradients (list): The weight gradients.
+            learning_rate (float): The learning rate.
+        """
         # Update biases
         for i, node in enumerate(self.output_nodes):
             node.bias -= learning_rate * bias_gradients[i]
@@ -97,6 +161,15 @@ class NeuralNetwork:
     
 
     def predict(self, test_set):
+        """
+        Make predictions on a given test set.
+
+        Args:
+            test_set (list): The test set.
+
+        Returns:
+            list: The predictions.
+        """
         predictions = []
         for input_values, target_values in test_set:
             output_values = self.forward_propagation(input_values)
@@ -105,17 +178,35 @@ class NeuralNetwork:
         # Return predictions with output values
         return predictions
 
-    def accuracy(self, training_set):
+    def accuracy(self, test_set):
+        """
+        Calculate the accuracy of the neural network.
+
+        Args:
+            training_set (list): The test set.
+        
+        Returns:
+            float: The accuracy of the neural network.
+        """
         # Make predictions on the training set using the predict method
-        predictions = self.predict(training_set)
+        predictions = self.predict(test_set)
         # Extract the true labels from the training set
-        true_labels = np.array([label for _, label in training_set])
+        true_labels = np.array([label for _, label in test_set])
         # Check how many predictions match the true labels
         correct = np.sum(np.array(predictions) == true_labels)
 
-        return correct / len(training_set) * 100
+        return correct / len(test_set) * 100
 
     def train(self, training_set, max_cost, max_epoch, learning_rate):
+        """
+        Train the neural network with a given training set.
+
+        Args:
+            training_set (list): The training set.
+            max_cost (float): The maximum cost.
+            max_epoch (int): The maximum number of epochs.
+            learning_rate (float): The learning rate.
+        """
         # Ensure loop runs at least once
         cost = max_cost + 1
         epoch = 0
